@@ -14,10 +14,10 @@ interface SparePart {
   category: string;
   manufacturer: string | null;
   description: string | null;
-  price: number;
+  selling_price: number; // ✅ renamed from price
   cost_price: number | null;
   stock_quantity: number;
-  minimum_stock: number;
+  min_stock: number; // ✅ renamed from minimum_stock
   unit: string;
   location: string | null;
 }
@@ -53,6 +53,7 @@ const PartsTable = ({ parts, onUpdate }: PartsTableProps) => {
 
   return (
     <div className="space-y-4">
+      {/* 🔍 Search Bar */}
       <div className="relative max-w-md">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
@@ -63,6 +64,7 @@ const PartsTable = ({ parts, onUpdate }: PartsTableProps) => {
         />
       </div>
 
+      {/* 📦 Table */}
       <div className="rounded-lg border border-border bg-card shadow-[var(--shadow-card)] overflow-hidden">
         <Table>
           <TableHeader>
@@ -72,7 +74,7 @@ const PartsTable = ({ parts, onUpdate }: PartsTableProps) => {
               <TableHead>Category</TableHead>
               <TableHead>Manufacturer</TableHead>
               <TableHead>Stock</TableHead>
-              <TableHead>Price</TableHead>
+              <TableHead>Selling Price</TableHead>
               <TableHead>Location</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -98,7 +100,7 @@ const PartsTable = ({ parts, onUpdate }: PartsTableProps) => {
                   <TableCell>
                     <span
                       className={`font-medium ${
-                        part.stock_quantity <= part.minimum_stock
+                        part.stock_quantity <= part.min_stock // ✅ updated
                           ? "text-destructive"
                           : "text-foreground"
                       }`}
@@ -106,7 +108,9 @@ const PartsTable = ({ parts, onUpdate }: PartsTableProps) => {
                       {part.stock_quantity} {part.unit}
                     </span>
                   </TableCell>
-                  <TableCell className="font-semibold">${part.price.toFixed(2)}</TableCell>
+                  <TableCell className="font-semibold">
+                    ₹{part.selling_price.toFixed(2)} {/* ✅ updated */}
+                  </TableCell>
                   <TableCell className="text-muted-foreground">{part.location || "-"}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
@@ -135,6 +139,7 @@ const PartsTable = ({ parts, onUpdate }: PartsTableProps) => {
         </Table>
       </div>
 
+      {/* ✏️ Edit Dialog */}
       {editingPart && (
         <EditPartDialog
           part={editingPart}

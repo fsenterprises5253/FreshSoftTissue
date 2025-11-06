@@ -14,10 +14,10 @@ interface SparePart {
   category: string;
   manufacturer: string | null;
   description: string | null;
-  price: number;
+  selling_price: number; // ✅ renamed from price
   cost_price: number | null;
   stock_quantity: number;
-  minimum_stock: number;
+  min_stock: number; // ✅ renamed from minimum_stock
   unit: string;
   location: string | null;
 }
@@ -37,10 +37,10 @@ const EditPartDialog = ({ part, open, onOpenChange, onPartUpdated }: EditPartDia
     category: part.category,
     manufacturer: part.manufacturer || "",
     description: part.description || "",
-    price: part.price.toString(),
+    selling_price: part.selling_price.toString(), // ✅ updated
     cost_price: part.cost_price?.toString() || "",
     stock_quantity: part.stock_quantity.toString(),
-    minimum_stock: part.minimum_stock.toString(),
+    min_stock: part.min_stock.toString(), // ✅ updated
     unit: part.unit,
     location: part.location || "",
   });
@@ -58,10 +58,10 @@ const EditPartDialog = ({ part, open, onOpenChange, onPartUpdated }: EditPartDia
           category: formData.category,
           manufacturer: formData.manufacturer || null,
           description: formData.description || null,
-          price: parseFloat(formData.price),
+          selling_price: parseFloat(formData.selling_price), // ✅ renamed
           cost_price: formData.cost_price ? parseFloat(formData.cost_price) : null,
           stock_quantity: parseInt(formData.stock_quantity),
-          minimum_stock: parseInt(formData.minimum_stock),
+          min_stock: parseInt(formData.min_stock), // ✅ renamed
           unit: formData.unit,
           location: formData.location || null,
         })
@@ -142,14 +142,14 @@ const EditPartDialog = ({ part, open, onOpenChange, onPartUpdated }: EditPartDia
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="edit_price">Selling Price *</Label>
+              <Label htmlFor="edit_selling_price">Selling Price *</Label>
               <Input
-                id="edit_price"
+                id="edit_selling_price"
                 type="number"
                 step="0.01"
                 required
-                value={formData.price}
-                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                value={formData.selling_price}
+                onChange={(e) => setFormData({ ...formData, selling_price: e.target.value })}
               />
             </div>
             <div className="space-y-2">
@@ -176,12 +176,12 @@ const EditPartDialog = ({ part, open, onOpenChange, onPartUpdated }: EditPartDia
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="edit_minimum_stock">Min. Stock</Label>
+              <Label htmlFor="edit_min_stock">Min. Stock</Label>
               <Input
-                id="edit_minimum_stock"
+                id="edit_min_stock"
                 type="number"
-                value={formData.minimum_stock}
-                onChange={(e) => setFormData({ ...formData, minimum_stock: e.target.value })}
+                value={formData.min_stock}
+                onChange={(e) => setFormData({ ...formData, min_stock: e.target.value })}
               />
             </div>
             <div className="space-y-2">
