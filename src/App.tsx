@@ -11,14 +11,24 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
+      {/* Global toast + notifications */}
       <Toaster />
       <Sonner />
+
+      {/* Router */}
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <div className="min-h-screen bg-background text-gray-900">
+          <Routes>
+            {/* Home / Hero + Dashboard */}
+            <Route path="/" element={<Index />} />
+
+            {/* Future routes can be added here */}
+            {/* <Route path="/dashboard" element={<DashboardPage />} /> */}
+
+            {/* Catch-all route */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </div>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
