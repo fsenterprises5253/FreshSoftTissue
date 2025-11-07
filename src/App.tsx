@@ -5,30 +5,34 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import Login from "./pages/Login";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      {/* Global toast + notifications */}
       <Toaster />
       <Sonner />
-
-      {/* Router */}
       <BrowserRouter>
-        <div className="min-h-screen bg-background text-gray-900">
-          <Routes>
-            {/* Home / Hero + Dashboard */}
-            <Route path="/" element={<Index />} />
+        <Routes>
+          {/* Public Route */}
+          <Route path="/login" element={<Login />} />
 
-            {/* Future routes can be added here */}
-            {/* <Route path="/dashboard" element={<DashboardPage />} /> */}
+          {/* Protected Routes */}
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Index />
+              </ProtectedRoute>
+            }
+          />
 
-            {/* Catch-all route */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </div>
+          {/* Catch-all */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
