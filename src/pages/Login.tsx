@@ -22,7 +22,7 @@ const Login = () => {
       });
 
       if (response.ok) {
-        localStorage.setItem("auth", "true");
+        sessionStorage.setItem("auth", "true"); // ✅ auto-clears on browser close
         navigate("/");
       } else {
         const data = await response.json().catch(() => ({}));
