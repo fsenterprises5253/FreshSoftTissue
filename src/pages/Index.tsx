@@ -1,7 +1,9 @@
 import { useState } from "react";
 import Dashboard from "@/components/Dashboard";
 import Navbar from "@/components/Navbar";
-import EzzyLogo from "@/assets/ezzylogo.png";
+
+// ✅ Import image from src/assets
+import ezzyLogo from "@/assets/ezzylogo.png";
 
 const Index = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -17,15 +19,18 @@ const Index = () => {
 
       {/* Hero Section */}
       <section className="flex flex-col items-center justify-center min-h-[70vh] bg-white text-gray-900 px-4 border-b border-gray-200 mt-16">
-        {/* Added mt-16 to prevent content from hiding behind fixed navbar */}
+        {/* ✅ Use imported logo */}
         <img
-          src={EzzyLogo}
+          src={ezzyLogo}
           alt="Ezzy Auto Parts Logo"
-          className="w-48 md:w-64 lg:w-72 mb-6"
+          className="h-80 w-auto mb-6 object-contain transition-transform duration-300 hover:scale-105"
+          loading="lazy"
         />
+
         <h1 className="text-4xl md:text-5xl font-bold text-center">
           Welcome to Ezzy Auto Parts
         </h1>
+
         <p className="text-lg md:text-xl text-gray-600 mt-3 text-center max-w-xl">
           Reliable spare parts for every vehicle — quality you can trust.
         </p>
