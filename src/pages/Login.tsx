@@ -16,7 +16,7 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const response = await fetch("https://ezzy-auth-api.onrender.com/api/login", {
+      const response = await fetch("https://shop-server-ulhl.onrender.com", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId, password }),
