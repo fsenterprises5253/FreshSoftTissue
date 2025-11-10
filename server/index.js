@@ -4,8 +4,8 @@ import bcrypt from "bcrypt";
 import cors from "cors";
 
 const app = express();
+app.use(cors({ origin: "*" }));
 app.use(express.json());
-app.use(cors());
 
 // Simulated user — securely hashed password
 const USERS = [
