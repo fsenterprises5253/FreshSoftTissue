@@ -111,6 +111,8 @@ const Billing = () => {
       return;
     }
 
+     const toastId = toast.loading("Preparing invoice for print...");
+     
     // Create a hidden iframe for printing
     const printFrame = document.createElement("iframe");
     printFrame.style.position = "fixed";
