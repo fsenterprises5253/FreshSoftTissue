@@ -35,12 +35,16 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
         </button>
 
         <button
-          onClick={() => navigate("/billing")}
+        onClick={() => {
+            navigate("/billing");
+            // Force refresh effect in Billing.tsx
+            window.dispatchEvent(new Event("billing-navigation"));
+          }}
           className="flex items-center gap-3 w-full p-3 rounded-lg text-gray-700 hover:bg-blue-100 hover:text-blue-600"
         >
           <FileText size={18} />
           {!collapsed && "Billing"}
-        </button>
+      </button>
       </nav>
 
       {/* Logout Button at Bottom */}

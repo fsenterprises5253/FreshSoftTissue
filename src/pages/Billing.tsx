@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -13,6 +14,8 @@ import {
 import { Plus, X, Trash2, Save, Printer } from "lucide-react";
 import { toast } from "sonner";
 import "./billing-print.css";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+
 
 interface SparePart {
   id: string;
@@ -45,16 +48,66 @@ const Billing = () => {
   const [parts, setParts] = useState<SparePart[]>([]);
   const [billItems, setBillItems] = useState<BillItem[]>([]);
   const [savedBills, setSavedBills] = useState<SavedBill[]>([]);
+  const [selectedBill, setSelectedBill] = useState<SavedBill | null>(null);
+  const [billDetails, setBillDetails] = useState<any[]>([]);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [selectedPart, setSelectedPart] = useState<SparePart | null>(null);
   const [quantity, setQuantity] = useState<number>(1);
   const [customPrice, setCustomPrice] = useState<number | "">("");
-  const printRef = useRef<HTMLDivElement>(null);
+  const printRef = useRef<HTMLDivElement>(null); // for Generate Bill
+  const printModalRef = useRef<HTMLDivElement>(null); // for Preview Invoice
+
+  const viewBillDetails = async (billId: string) => {
+  try {
+    toast.loading("Loading bill details...");
+
+    // Fetch the selected bill
+    const selected = savedBills.find((b) => b.id === billId);
+    if (!selected) {
+      toast.error("Bill not found!");
+      return;
+    }
+
+    // Fetch bill items from Supabase
+    const { data: items, error } = await supabase
+      .from("bill_items")
+      .select("*")
+      .eq("bill_id", billId);
+
+    if (error) throw error;
+
+    console.log("🧾 Bill items fetched:", items);
+
+    // ✅ Update states
+    setSelectedBill(selected);
+    setBillDetails(items || []);
+    setShowPreviewModal(true);
+
+    toast.dismiss();
+  } catch (err) {
+    toast.dismiss();
+    console.error("❌ Error loading bill details:", err);
+    toast.error("Failed to load bill details.");
+  }
+};
 
   // ✅ Reliable manual print method (works across browsers)
-  const handlePrint = () => {
+  const handlePrint = (
+  ref: React.RefObject<HTMLDivElement>,
+  billNumber?: string
+) => {
   try {
-    if (!billItems.length) {
-      toast.error("No items to print.");
+    // ✅ Use billDetails for preview modal or billItems for generate bill
+    const itemsToPrint = billDetails.length > 0 ? billDetails : billItems;
+    const currentBill = selectedBill || {
+      bill_number: billNumber || "N/A",
+      customer_name: customerName || "N/A",
+      total_amount: subtotal,
+      created_at: billDate || new Date().toISOString(),
+    };
+
+    if (!ref.current || itemsToPrint.length === 0) {
+      toast.error("No items to print");
       return;
     }
 
@@ -74,109 +127,76 @@ const Billing = () => {
       return;
     }
 
-    // Build rows dynamically
-    const rows = billItems
+    // ✅ Build rows dynamically based on available items
+    const rows = itemsToPrint
       .map(
-        (item, index) => `
+        (item: any, index: number) => `
           <tr>
             <td style="text-align:center;">${index + 1}</td>
             <td style="text-align:center;">${item.part_number}</td>
             <td>${item.part_name}</td>
-            <td style="text-align:center;">-</td>
             <td style="text-align:center;">${item.quantity}</td>
-            <td style="text-align:right;">₹${item.custom_price.toFixed(2)}</td>
-            <td style="text-align:right;">₹${item.total.toFixed(2)}</td>
+            <td style="text-align:right;">₹${(
+              item.selling_price || item.custom_price || 0
+            ).toFixed(2)}</td>
+            <td style="text-align:right;">₹${(item.total || 0).toFixed(2)}</td>
           </tr>
         `
       )
       .join("");
 
-    // Open and write printable HTML
+    // ✅ Compose print-ready HTML
     doc.open();
     doc.write(`
       <html>
         <head>
-          <title>Invoice_${billNumber}</title>
+          <title>Invoice_${currentBill.bill_number}</title>
           <style>
-            @page {
-              size: A4;
-              margin: 10mm;
-            }
+            @page { size: A4; margin: 10mm; }
             body {
               font-family: 'Courier New', monospace;
               font-size: 12px;
               color: #000;
               margin: 0;
-              padding: 0;
-              display: flex;
-              flex-direction: column;
-              height: 100%;
+              padding: 10mm;
             }
-
-            /* Header */
             .header {
-              border: 1px solid #000;
-              background: #f2f2f2;
               text-align: center;
-              padding: 8px;
               font-weight: bold;
+              margin-bottom: 5px;
             }
-
             .sub-header {
               text-align: center;
               font-size: 11px;
-              margin-bottom: 4px;
+              margin-bottom: 10px;
             }
-
-            /* Invoice Info */
             .info {
               display: flex;
               justify-content: space-between;
               font-size: 11px;
-              padding: 5px 10px;
+              margin-bottom: 10px;
             }
-
-            /* Tables */
             table {
               width: 100%;
               border-collapse: collapse;
             }
-
             th, td {
               border: 1px solid #000;
               padding: 4px;
               vertical-align: top;
             }
-
             th {
               background: #f8f8f8;
               text-align: center;
             }
-
-            .totals {
-              margin-top: auto;
-              border-top: 1px solid #000;
-            }
-
-            .totals td {
-              border: none;
-              padding: 3px 5px;
-              font-size: 12px;
-            }
-
             .footer {
-              margin-top: 15mm;
+              margin-top: 20px;
+              border-top: 1px solid #000;
+              padding-top: 10px;
               display: flex;
               justify-content: space-between;
               font-size: 12px;
-              border-top: 1px solid #000;
-              padding-top: 5mm;
             }
-
-            .bottom {
-              margin-top: auto;
-            }
-
             .address {
               text-align: center;
               font-size: 11px;
@@ -184,22 +204,18 @@ const Billing = () => {
             }
           </style>
         </head>
-        <body>
-          <div class="header">
-            Al-Shamali Intl. Co. Auto Parts Center
-          </div>
-          <div class="sub-header">
-            EZZY STORE — All Kind of Engine & Suspension Items
-          </div>
+        <body onload="window.print(); window.close();">
+          <div class="header">AL-SHAMALI INTL. CO. AUTO PARTS CENTER</div>
+          <div class="sub-header">EZZY STORE — All Kind of Engine & Suspension Items</div>
 
           <div class="info">
             <div>
-              Invoice #: ${billNumber}<br>
-              Messers: ${customerName || "N/A"}
+              Invoice #: ${currentBill.bill_number}<br>
+              Messers: ${currentBill.customer_name}
             </div>
             <div style="text-align:right;">
               Branch: Main<br>
-              Date: ${billDate}
+              Date: ${new Date(currentBill.created_at).toLocaleString()}
             </div>
           </div>
 
@@ -212,8 +228,7 @@ const Billing = () => {
               <tr>
                 <th>S.No</th>
                 <th>Part No.</th>
-                <th>Part No. & Description</th>
-                <th>Brand</th>
+                <th>Description</th>
                 <th>Qty</th>
                 <th>U-Price</th>
                 <th>Amount</th>
@@ -222,39 +237,26 @@ const Billing = () => {
             <tbody>${rows}</tbody>
           </table>
 
-          <div class="bottom">
-            <table style="margin-top:10px;">
-              <tr>
-                <td colspan="6" style="text-align:right; border:none;">Sub Total:</td>
-                <td style="text-align:right; border:none;">₹${subtotal.toFixed(2)}</td>
-              </tr>
-              <tr>
-                <td colspan="6" style="text-align:right; border:none;">Discount:</td>
-                <td style="text-align:right; border:none;">₹0.00</td>
-              </tr>
-              <tr>
-                <td colspan="6" style="text-align:right; border:none;"><strong>Net Amount:</strong></td>
-                <td style="text-align:right; border:none;"><strong>₹${subtotal.toFixed(2)}</strong></td>
-              </tr>
-            </table>
+          <div style="text-align:right; margin-top:10px;">
+            <p>Subtotal: ₹${currentBill.total_amount.toFixed(2)}</p>
+            <p>Discount: ₹0.00</p>
+            <p><strong>Net Amount: ₹${currentBill.total_amount.toFixed(2)}</strong></p>
+          </div>
 
-            <p style="margin-top:10px;">Total Qty: ${billItems.reduce((sum, i) => sum + i.quantity, 0)}</p>
+          <div class="footer">
+            <p>Receiver ___________________</p>
+            <p>Signature ___________________</p>
+          </div>
 
-            <div class="footer">
-              <p>Receiver ___________________</p>
-              <p>Signature ___________________</p>
-            </div>
-
-            <div class="address">
-              Shuwaikh Industrial Area, Opp. Garage Noor
-            </div>
+          <div class="address">
+            Shuwaikh Industrial Area, Opp. Garage Noor
           </div>
         </body>
       </html>
     `);
     doc.close();
 
-    // ✅ Ensure the print window triggers properly
+    // ✅ Print trigger
     setTimeout(() => {
       printFrame.contentWindow?.focus();
       printFrame.contentWindow?.print();
@@ -265,6 +267,21 @@ const Billing = () => {
     toast.error("🧾 Unable to print invoice.");
   }
 };
+
+
+  useEffect(() => {
+  const handleSidebarClick = () => {
+    console.log("Sidebar Billing clicked — resetting form");
+    setShowBillForm(false);
+  };
+
+  window.addEventListener("billing-navigation", handleSidebarClick);
+
+  return () => {
+    window.removeEventListener("billing-navigation", handleSidebarClick);
+  };
+}, []);
+
 
   useEffect(() => {
     fetchParts();
@@ -342,50 +359,70 @@ const Billing = () => {
   const subtotal = billItems.reduce((sum, i) => sum + i.total, 0);
 
   const saveBill = async () => {
-    if (billItems.length === 0) {
-      toast.error("Add at least one item before saving the bill");
-      return;
+  if (billItems.length === 0) {
+    toast.error("Add at least one item before saving the bill");
+    return;
+  }
+
+  try {
+    toast.loading("Saving bill...");
+
+    // ✅ Step 1: Save the main bill record
+    const { data: billData, error: billError } = await supabase
+      .from("bills")
+      .insert([
+        {
+          bill_number: billNumber,
+          customer_name: customerName || "N/A",
+          total_amount: subtotal,
+          created_at: new Date().toISOString(),
+        },
+      ])
+      .select()
+      .single();
+
+    if (billError || !billData) {
+      throw billError || new Error("Failed to create bill record");
     }
 
-    try {
-      const { data: billData, error: billError } = await supabase
-        .from("bills")
-        .insert([
-          {
-            bill_number: billNumber,
-            customer_name: customerName || "N/A",
-            total_amount: subtotal,
-            created_at: new Date().toISOString(),
-          },
-        ])
-        .select()
-        .single();
+    console.log("🧾 Bill created:", billData);
 
-      if (billError) throw billError;
+    // ✅ Step 2: Prepare items linked to this bill ID
+    const itemsData = billItems.map((item) => ({
+  bill_id: billData.id,
+  part_number: item.part_number,
+  part_name: item.part_name,
+  quantity: item.quantity,
+  total: item.total,
+  selling_price: Number(item.custom_price) || Number(item.selling_price) || 0, // ✅ FIXED
+}));
 
-      const itemsData = billItems.map((item) => ({
-        bill_id: billData.id,
-        part_number: item.part_number,
-        part_name: item.part_name,
-        quantity: item.quantity,
-        total: item.total,
-        unit_price: item.custom_price,
-      }));
+    console.log("🧩 Bill items to insert:", itemsData);
 
-      const { error: itemsError } = await supabase
-        .from("bill_items")
-        .insert(itemsData);
+    // ✅ Step 3: Insert all related bill items
+    const { error: itemsError } = await supabase
+      .from("bill_items")
+      .insert(itemsData);
 
-      if (itemsError) console.warn("Warning:", itemsError.message);
+    if (itemsError) {
+  console.error("⚠️ Bill items insert error:", itemsError);
+  throw itemsError;
+}
 
-      toast.success("✅ Bill saved successfully!");
-      setShowBillForm(false);
-      fetchSavedBills();
-    } catch (err) {
-      console.error(err);
-      toast.error("Error saving bill. Please try again.");
-    }
-  };
+    toast.dismiss();
+    toast.success("✅ Bill and items saved successfully!");
+
+    // ✅ Step 4: Reset UI + reload saved bills
+    setShowBillForm(false);
+    fetchSavedBills();
+  } catch (err: any) {
+  console.error("❌ Error saving bill:", err);
+  if (err?.message) toast.error(err.message);
+  else toast.error("Error saving bill. Please try again.");
+  toast.dismiss();
+}
+};
+
 
   const deleteBill = async (billId: string) => {
     const confirmDelete = window.confirm(
@@ -449,7 +486,14 @@ const Billing = () => {
                 <TableBody>
                   {savedBills.map((bill) => (
                     <TableRow key={bill.id}>
-                      <TableCell>{bill.bill_number}</TableCell>
+                      <TableCell>
+                        <button
+                            className="text-blue-600 hover:underline"
+                            onClick={() => viewBillDetails(bill.id)}
+                          >
+                            {bill.bill_number}
+                          </button>
+                      </TableCell>
                       <TableCell>{bill.customer_name}</TableCell>
                       <TableCell>
                         {new Date(bill.created_at).toLocaleString()}
@@ -627,7 +671,7 @@ const Billing = () => {
                     <Save className="w-4 h-4" /> Save Bill
                   </Button>
                   <Button
-                    onClick={handlePrint}
+                    onClick={() => handlePrint(printRef, billNumber)}
                     className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2"
                   >
                     <Printer className="w-4 h-4" /> Print Invoice
@@ -635,6 +679,107 @@ const Billing = () => {
                 </div>
               </div>
             )}
+
+            {showPreviewModal && selectedBill && (
+               <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 transition-opacity duration-300 ease-in-out">
+    <div className="bg-white p-6 rounded-lg shadow-lg w-[80%] max-h-[90vh] overflow-auto">
+      {/* Header */}
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-bold">
+          Invoice Preview — {selectedBill.bill_number}
+        </h2>
+        <Button
+          onClick={() => setShowPreviewModal(false)}
+          className="bg-gray-300 text-black hover:bg-gray-400"
+        >
+          Close
+        </Button>
+      </div>
+
+      {/* Print button */}
+      <Button
+        onClick={() => {
+  setTimeout(() => handlePrint(printModalRef, selectedBill?.bill_number), 300);
+}}
+        className="mb-4 bg-blue-600 hover:bg-blue-700 text-white"
+      >
+        🖨️ Print Invoice
+      </Button>
+
+      {/* Preview content */}
+      <div ref={printModalRef}>
+        <div className="text-center mb-4">
+          <h2 className="text-lg font-bold uppercase">
+            AL-SHAMALI INTL. CO. AUTO PARTS CENTER
+          </h2>
+          <p className="text-xs">
+            EZZY STORE — All Kind of Engine & Suspension Items
+          </p>
+          <h3 className="mt-2 border w-fit px-3 py-1 mx-auto text-sm">
+            CREDIT INVOICE
+          </h3>
+        </div>
+
+        <div className="flex justify-between text-xs mb-3">
+          <div>
+            Invoice #: {selectedBill.bill_number} <br />
+            Messers: {selectedBill.customer_name}
+          </div>
+          <div className="text-right">
+            Date: {new Date(selectedBill.created_at).toLocaleString()} <br />
+            Branch: Main
+          </div>
+        </div>
+
+        <table className="w-full border-collapse border text-xs mb-3">
+          <thead>
+            <tr>
+              <th className="border p-1">S.No</th>
+              <th className="border p-1">Part No</th>
+              <th className="border p-1">Description</th>
+              <th className="border p-1">Qty</th>
+              <th className="border p-1">U-Price</th>
+              <th className="border p-1">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            {billDetails && billDetails.length > 0 ? (
+              billDetails.map((item, index) => (
+                <tr key={item.id}>
+                  <td className="border p-1 text-center">{index + 1}</td>
+                  <td className="border p-1 text-center">{item.part_number}</td>
+                  <td className="border p-1">{item.part_name}</td>
+                  <td className="border p-1 text-center">{item.quantity}</td>
+                  <td className="border p-1 text-right">₹{item.selling_price}</td>
+                  <td className="border p-1 text-right">₹{item.total}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={6} className="text-center text-gray-500 py-2">
+                  No items found for this bill.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+
+        <div className="text-right text-sm mt-4">
+          <p>Subtotal: ₹{selectedBill.total_amount.toFixed(2)}</p>
+          <p>Discount: ₹0.00</p>
+          <p className="font-semibold">
+            Net Amount: ₹{selectedBill.total_amount.toFixed(2)}
+          </p>
+        </div>
+
+        <div className="flex justify-between text-xs mt-6 pt-4 border-t">
+          <p>Receiver ___________________</p>
+          <p>Signature ___________________</p>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
           </div>
         </>
       )}
