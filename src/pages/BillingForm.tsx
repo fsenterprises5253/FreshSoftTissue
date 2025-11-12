@@ -36,18 +36,45 @@ const BillingForm = () => {
 
   useEffect(() => {
     fetchParts();
-    setBillNumber("INV-" + Date.now().toString().slice(-6));
+    generateNextBillNumber();
     setBillDate(new Date().toLocaleString());
   }, []);
 
+  // ✅ Fetch spare parts
   const fetchParts = async () => {
     const { data, error } = await supabase.from("spare_parts").select("*");
     if (error) toast.error("Failed to load parts");
     else setParts(data || []);
   };
 
+  // ✅ Generate sequential bill number (INV-0001, INV-0002, etc.)
+  const generateNextBillNumber = async () => {
+    const { data, error } = await supabase
+      .from("bills")
+      .select("bill_number")
+      .order("created_at", { ascending: false })
+      .limit(1);
+
+    if (error) {
+      console.error("Error fetching last bill:", error);
+      setBillNumber("INV-0001");
+      return;
+    }
+
+    if (data && data.length > 0) {
+      const lastBill = data[0].bill_number;
+      const lastNumber = parseInt(lastBill.replace("INV-", ""), 10);
+      const nextNumber = (lastNumber + 1).toString().padStart(4, "0");
+      setBillNumber(`INV-${nextNumber}`);
+    } else {
+      setBillNumber("INV-0001");
+    }
+  };
+
+  // ✅ Add item to bill
   const addItem = () => {
     if (!selectedPart) return toast.error("Select a part first");
+
     const price = customPrice && customPrice > 0 ? Number(customPrice) : selectedPart.price;
     const newItem = {
       id: selectedPart.id + "-" + Math.random(), // Ensure unique key
@@ -56,6 +83,7 @@ const BillingForm = () => {
       price,
       total: price * quantity,
     };
+
     setBillItems([...billItems, newItem]);
     setSelectedPart(null);
     setQuantity(1);
@@ -64,6 +92,7 @@ const BillingForm = () => {
 
   const subtotal = billItems.reduce((sum, i) => sum + i.total, 0);
 
+  // ✅ Save bill and items
   const saveBill = async () => {
     try {
       const { data: billData, error: billError } = await supabase
@@ -99,7 +128,7 @@ const BillingForm = () => {
     }
   };
 
-  // ✅ Print Invoice
+  // ✅ Print invoice
   const handlePrint = () => {
     if (billItems.length === 0) {
       toast.error("No items to print");
@@ -112,13 +141,13 @@ const BillingForm = () => {
     const rows = billItems
       .map(
         (item, index) => `
-          <tr>
-            <td style="text-align:center;">${index + 1}</td>
-            <td style="text-align:center;">${item.gsm_number}</td>
-            <td style="text-align:center;">${item.quantity}</td>
-            <td style="text-align:right;">₹${item.price.toFixed(2)}</td>
-            <td style="text-align:right;">₹${item.total.toFixed(2)}</td>
-          </tr>`
+        <tr>
+          <td style="text-align:center;">${index + 1}</td>
+          <td style="text-align:center;">${item.gsm_number}</td>
+          <td style="text-align:center;">${item.quantity}</td>
+          <td style="text-align:right;">₹${item.price.toFixed(2)}</td>
+          <td style="text-align:right;">₹${item.total.toFixed(2)}</td>
+        </tr>`
       )
       .join("");
 
