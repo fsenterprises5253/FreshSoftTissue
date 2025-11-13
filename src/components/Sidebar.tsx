@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { LayoutGrid, FileText, LogOut } from "lucide-react";
+import { LayoutGrid, FileText, LogOut, BarChart3 } from "lucide-react"; // 📊 Added BarChart3 icon
 import EzzyLogo from "@/assets/logo.png";
 
 interface SidebarProps {
@@ -16,13 +16,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
     navigate("/login");
   };
 
-  // ✅ Improved: Detect active state for both exact and nested routes
-  const isActive = (path: string) => {
-    if (path === "/billing") {
-      return location.pathname.startsWith("/billing");
-    }
-    return location.pathname === path;
-  };
+  const isActive = (path: string) => location.pathname === path;
 
   return (
     <aside
@@ -30,7 +24,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
         collapsed ? "w-20" : "w-64"
       }`}
     >
-      
+
 
       {/* Navigation Section */}
       <nav className="flex-1 space-y-2 px-3 mt-4">
@@ -67,6 +61,24 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
             className={`${isActive("/billing") ? "text-white" : "text-blue-600"}`}
           />
           {!collapsed && "Billing"}
+        </button>
+
+        {/* 🧾 Expense Report */}
+        <button
+          onClick={() => navigate("/expense-report")}
+          className={`flex items-center gap-3 w-full p-3 rounded-lg transition-all duration-200 ${
+            isActive("/expense-report")
+              ? "bg-blue-600 text-white font-semibold shadow-sm"
+              : "text-blue-600 hover:bg-blue-100"
+          }`}
+        >
+          <BarChart3
+            size={18}
+            className={`${
+              isActive("/expense-report") ? "text-white" : "text-blue-600"
+            }`}
+          />
+          {!collapsed && "Expense Report"}
         </button>
       </nav>
 

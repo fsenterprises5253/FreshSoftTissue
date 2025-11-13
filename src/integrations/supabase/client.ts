@@ -1,27 +1,27 @@
 import { createClient } from "@supabase/supabase-js";
-import type { Database } from "@/types/database.types"; // ✅ Make sure this path is correct
+import type { Database } from "./types"; // ✅ Points to your generated Supabase types
 
-// ✅ Load environment variables (defined in .env or .env.local)
+// ✅ Load environment variables (from .env or .env.local)
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-// ✅ Check for missing values and provide a clear error
+// ✅ Check if environment variables exist
 if (!supabaseUrl || !supabaseAnonKey) {
   console.error("❌ Missing Supabase environment variables!");
-  throw new Error("Supabase URL or Anon key not found in environment variables.");
+  throw new Error("Supabase URL or Anon Key is missing. Please check your .env file.");
 }
 
-// ✅ Create the Supabase client, typed with your Database schema
+// ✅ Create Supabase client with full typing
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   auth: {
     storage: localStorage,
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: true, // 🆕 ensures OAuth flows work properly
+    detectSessionInUrl: true, // 🧩 Helps for OAuth redirects if used
   },
 });
 
-// ✅ Optional: Helper type exports (makes imports easier elsewhere)
+// ✅ Type helpers (for cleaner imports throughout your app)
 export type SupabaseClient = typeof supabase;
 export type Tables = Database["public"]["Tables"];
 export type TablesInsert<K extends keyof Tables> = Tables[K]["Insert"];

@@ -10,6 +10,7 @@ import Index from "@/pages/Index";
 import BillingList from "@/pages/BillingList";   // ✅ Page for saved bills
 import BillingForm from "@/pages/BillingForm";   // ✅ Page for adding new bills
 import BillingView from "@/pages/BillingView";   // ✅ Page for viewing bill details
+import ExpenseReport from "@/pages/ExpenseReport"; // ✅ New Expense Report page
 import NotFound from "@/pages/NotFound";
 import Login from "@/pages/Login";
 import InvoiceForm from "@/pages/InvoiceForm";
@@ -80,7 +81,19 @@ const App = () => (
             }
           />
 
-          {/* Existing Invoice Form */}
+          {/* ✅ Expense Report Page */}
+          <Route
+            path="/expense-report"
+            element={
+              <ProtectedRoute>
+                <SidebarLayout>
+                  <ExpenseReport />
+                </SidebarLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* ✅ Existing Invoice Form */}
           <Route
             path="/invoice"
             element={
