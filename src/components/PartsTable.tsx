@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -35,26 +35,50 @@ interface PartsTableProps {
 const PartsTable = ({ parts, onUpdate }: PartsTableProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [editingPart, setEditingPart] = useState<SparePart | null>(null);
+  const [localParts, setLocalParts] = useState(parts);
 
-  const filteredParts = parts.filter(
+  // Sync local state with props
+  React.useEffect(() => {
+    setLocalParts(parts);
+  }, [parts]);
+
+  const filteredParts = localParts.filter(
     (part) =>
       part.gsm_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
       part.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (part.manufacturer?.toLowerCase() || "").includes(searchTerm.toLowerCase())
   );
 
+  // ✅ Delete with optimistic UI and Undo support
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this part?")) return;
+  if (!confirm("Are you sure you want to delete this part?")) return;
 
-    try {
-      const { error } = await supabase.from("spare_parts").delete().eq("id", id);
-      if (error) throw error;
-      toast.success("Part deleted successfully!");
-      onUpdate();
-    } catch (error: any) {
-      toast.error(error.message || "Failed to delete part");
+  console.log("🧩 Deleting ID:", id);
+
+  try {
+    const { data, error } = await supabase
+      .from("spare_parts")
+      .delete()
+      .eq("id", id)
+      .select();
+
+    if (error) {
+      console.error("❌ Supabase delete error:", error);
+      toast.error("Failed to delete from Supabase");
+      return;
     }
-  };
+
+    console.log("✅ Deleted rows:", data);
+
+    // Remove from UI
+    setLocalParts((prev) => prev.filter((p) => p.id !== id));
+    toast.success("✅ Part deleted successfully!");
+    onUpdate();
+  } catch (err: any) {
+    console.error("Unexpected delete error:", err);
+    toast.error("Unexpected delete error");
+  }
+};
 
   return (
     <div className="space-y-4">
@@ -70,7 +94,7 @@ const PartsTable = ({ parts, onUpdate }: PartsTableProps) => {
       </div>
 
       {/* 📦 Table */}
-      <div className="rounded-lg border border-border bg-card shadow-[var(--shadow-card)] overflow-hidden">
+      <div className="rounded-lg border border-border bg-card shadow-sm overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/50 hover:bg-muted/50">
@@ -157,6 +181,7 @@ const PartsTable = ({ parts, onUpdate }: PartsTableProps) => {
                       >
                         <Pencil className="h-4 w-4" />
                       </Button>
+
                       <Button
                         variant="ghost"
                         size="icon"

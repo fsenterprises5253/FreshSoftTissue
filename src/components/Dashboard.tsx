@@ -171,7 +171,7 @@ const Dashboard = () => {
       {/* ✅ Parts Table */}
       {!loading && (
         <div>
-          <h2 className="text-xl font-semibold mt-8 mb-4">All Stock Det</h2>
+          <h2 className="text-xl font-semibold mt-8 mb-4">All Stock Data</h2>
           <PartsTable parts={parts} onUpdate={fetchParts} />
         </div>
       )}

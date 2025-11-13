@@ -23,7 +23,7 @@ const Index = () => {
         <img
           src={logo}
           alt="Ezzy Auto Parts Logo"
-          className="h-80 w-auto mb-6 object-contain transition-transform duration-300 hover:scale-105"
+          className="h-80 w-auto mb-5 object-contain transition-transform duration-300 hover:scale-105"
           loading="lazy"
         />
 
@@ -32,7 +32,7 @@ const Index = () => {
         </h1>
 
         <p className="text-lg md:text-xl text-gray-600 mt-3 text-center max-w-xl">
-          Reliable spare parts for every vehicle — quality you can trust.
+          Freshness you can feel, softness you can trust.
         </p>
       </section>
 

@@ -94,39 +94,69 @@ const BillingForm = () => {
 
   // ✅ Save bill and items
   const saveBill = async () => {
-    try {
-      const { data: billData, error: billError } = await supabase
-        .from("bills")
-        .insert([
-          {
-            bill_number: billNumber,
-            customer_name: customerName || "N/A",
-            total_amount: subtotal,
-            created_at: new Date().toISOString(),
-          },
-        ])
-        .select()
+  try {
+    // ✅ Step 1: Save Bill
+    const { data: billData, error: billError } = await supabase
+      .from("bills")
+      .insert([
+        {
+          bill_number: billNumber,
+          customer_name: customerName || "N/A",
+          total_amount: subtotal,
+          created_at: new Date().toISOString(),
+        },
+      ])
+      .select()
+      .single();
+
+    if (billError || !billData) throw billError;
+
+    // ✅ Step 2: Save Bill Items
+    const itemsData = billItems.map((item) => ({
+      bill_id: billData.id,
+      gsm_number: item.gsm_number,
+      quantity: item.quantity,
+      price: item.price,
+      total: item.total,
+    }));
+
+    const { error: itemsError } = await supabase.from("bill_items").insert(itemsData);
+    if (itemsError) throw itemsError;
+
+    // ✅ Step 3: Deduct from Inventory
+    for (const item of billItems) {
+      const { data: partData, error: fetchError } = await supabase
+        .from("spare_parts")
+        .select("id, stock_quantity")
+        .eq("gsm_number", item.gsm_number)
         .single();
 
-      if (billError || !billData) throw billError;
+      if (fetchError) {
+        console.warn(`⚠️ Failed to fetch part for GSM ${item.gsm_number}`);
+        continue;
+      }
 
-      const itemsData = billItems.map((item) => ({
-        bill_id: billData.id,
-        gsm_number: item.gsm_number,
-        quantity: item.quantity,
-        price: item.price,
-        total: item.total,
-      }));
+      const newStock = Math.max((partData?.stock_quantity || 0) - item.quantity, 0);
 
-      const { error: itemsError } = await supabase.from("bill_items").insert(itemsData);
-      if (itemsError) throw itemsError;
+      const { error: updateError } = await supabase
+        .from("spare_parts")
+        .update({ stock_quantity: newStock })
+        .eq("gsm_number", item.gsm_number);
 
-      toast.success("✅ Bill saved successfully!");
-      navigate("/billing");
-    } catch (err: any) {
-      toast.error(err.message || "Failed to save bill");
+      if (updateError) {
+        console.error(`❌ Failed to update stock for GSM ${item.gsm_number}`, updateError);
+      } else {
+        console.log(`✅ Updated stock for ${item.gsm_number}: ${newStock}`);
+      }
     }
-  };
+
+    toast.success("✅ Bill saved and stock updated successfully!");
+    navigate("/billing");
+  } catch (err: any) {
+    console.error("Save bill error:", err);
+    toast.error(err.message || "Failed to save bill");
+  }
+};
 
   // ✅ Print invoice
   const handlePrint = () => {
