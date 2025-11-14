@@ -95,7 +95,7 @@ const BillingForm = () => {
   // ✅ Save bill and items
   const saveBill = async () => {
   try {
-    // ✅ Step 1: Save Bill
+    // Step 1: Save Bill
     const { data: billData, error: billError } = await supabase
       .from("bills")
       .insert([
@@ -111,49 +111,43 @@ const BillingForm = () => {
 
     if (billError || !billData) throw billError;
 
-    // ✅ Step 2: Save Bill Items
+    // Step 2: Save Bill Items (⚡ FIXED created_at added)
     const itemsData = billItems.map((item) => ({
       bill_id: billData.id,
       gsm_number: item.gsm_number,
       quantity: item.quantity,
       price: item.price,
       total: item.total,
+      created_at: new Date().toISOString(),   // ✅ REQUIRED for Profit Dashboard
     }));
 
-    const { error: itemsError } = await supabase.from("bill_items").insert(itemsData);
+    const { error: itemsError } =
+      await supabase.from("bill_items").insert(itemsData);
+
     if (itemsError) throw itemsError;
 
-    // ✅ Step 3: Deduct from Inventory
+    // Step 3: Deduct from Stock
     for (const item of billItems) {
-      const { data: partData, error: fetchError } = await supabase
+      const { data: partData } = await supabase
         .from("spare_parts")
         .select("id, stock_quantity")
         .eq("gsm_number", item.gsm_number)
         .single();
 
-      if (fetchError) {
-        console.warn(`⚠️ Failed to fetch part for GSM ${item.gsm_number}`);
-        continue;
-      }
+      if (!partData) continue;
 
-      const newStock = Math.max((partData?.stock_quantity || 0) - item.quantity, 0);
+      const newStock = Math.max(partData.stock_quantity - item.quantity, 0);
 
-      const { error: updateError } = await supabase
+      await supabase
         .from("spare_parts")
         .update({ stock_quantity: newStock })
         .eq("gsm_number", item.gsm_number);
-
-      if (updateError) {
-        console.error(`❌ Failed to update stock for GSM ${item.gsm_number}`, updateError);
-      } else {
-        console.log(`✅ Updated stock for ${item.gsm_number}: ${newStock}`);
-      }
     }
 
-    toast.success("✅ Bill saved and stock updated successfully!");
+    toast.success("Bill saved & stock updated!");
     navigate("/billing");
   } catch (err: any) {
-    console.error("Save bill error:", err);
+    console.error(err);
     toast.error(err.message || "Failed to save bill");
   }
 };

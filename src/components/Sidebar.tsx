@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { LayoutGrid, FileText, LogOut, BarChart3 } from "lucide-react"; // 📊 Added BarChart3 icon
+import { LayoutGrid, FileText, LogOut, BarChart3 } from "lucide-react"; 
 import EzzyLogo from "@/assets/logo.png";
 
 interface SidebarProps {
@@ -25,9 +25,9 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
       }`}
     >
 
-
       {/* Navigation Section */}
       <nav className="flex-1 space-y-2 px-3 mt-4">
+        
         {/* Dashboard */}
         <button
           onClick={() => navigate("/")}
@@ -63,7 +63,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
           {!collapsed && "Billing"}
         </button>
 
-        {/* 🧾 Expense Report */}
+        {/* Expense Report */}
         <button
           onClick={() => navigate("/expense-report")}
           className={`flex items-center gap-3 w-full p-3 rounded-lg transition-all duration-200 ${
@@ -74,12 +74,27 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
         >
           <BarChart3
             size={18}
-            className={`${
-              isActive("/expense-report") ? "text-white" : "text-blue-600"
-            }`}
+            className={`${isActive("/expense-report") ? "text-white" : "text-blue-600"}`}
           />
           {!collapsed && "Expense Report"}
         </button>
+
+        {/* Profit Report */}
+        <button
+          onClick={() => navigate("/profit")}
+          className={`flex items-center gap-3 w-full p-3 rounded-lg transition-all duration-200 ${
+            isActive("/profit")
+              ? "bg-blue-600 text-white font-semibold shadow-sm"
+              : "text-blue-600 hover:bg-blue-100"
+          }`}
+        >
+          <BarChart3
+            size={18}
+            className={`${isActive("/profit") ? "text-white" : "text-blue-600"}`}
+          />
+          {!collapsed && "Profit Report"}
+        </button>
+
       </nav>
 
       {/* Logout */}

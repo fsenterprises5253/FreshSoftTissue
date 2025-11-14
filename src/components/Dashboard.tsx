@@ -11,6 +11,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { useNavigate } from "react-router-dom"; // ✅ Added navigation
 
 interface SparePart {
   id: string;
@@ -29,7 +30,9 @@ const Dashboard = () => {
   const [parts, setParts] = useState<SparePart[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // ✅ Fetch all parts from Supabase
+  const navigate = useNavigate(); // ✅ Navigation hook
+
+  // Fetch all parts
   const fetchParts = async () => {
     setLoading(true);
     const { data, error } = await supabase.from("spare_parts").select("*");
@@ -46,8 +49,12 @@ const Dashboard = () => {
   useEffect(() => {
     fetchParts();
   }, []);
+  
 
-  // ✅ Calculations
+  // --------------------------
+  // 📌 Updated Calculations
+  // --------------------------
+
   const totalParts = parts.length;
 
   const inventoryValue = parts.reduce(
@@ -55,24 +62,28 @@ const Dashboard = () => {
     0
   );
 
-  const averagePrice =
-    parts.length > 0
-      ? parts.reduce((sum, p) => sum + (p.price || 0), 0) / parts.length
-      : 0;
+  // ✅ Correct Profit Formula
+  const totalProfit = parts.reduce((sum, p) => {
+    const cost = p.cost_price || 0;
+    const sell = p.price || 0;
+    const profitPerItem = sell - cost;
+    return sum + profitPerItem * p.stock_quantity;
+  }, 0);
 
   const lowStockParts = parts.filter((p) => p.stock_quantity < p.minimum_stock);
   const lowStockCount = lowStockParts.length;
 
   return (
     <div className="space-y-8">
-      {/* 🔹 Header Section */}
+      {/* Header */}
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold tracking-tight">Stock Inventory</h1>
         <AddPartDialog onPartAdded={fetchParts} />
       </div>
 
-      {/* 🔹 Stats Cards */}
+      {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+        {/* Total Stock */}
         <Card>
           <CardHeader>
             <CardTitle>Total Stock</CardTitle>
@@ -83,6 +94,7 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
+        {/* Inventory Value */}
         <Card>
           <CardHeader>
             <CardTitle>Inventory Value</CardTitle>
@@ -93,17 +105,25 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Average Price</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">₹{averagePrice.toFixed(2)}</p>
-            <p className="text-muted-foreground">Per Stock average</p>
-          </CardContent>
-        </Card>
+        {/* 🔥 Profit (Clickable) */}
+        <div
+          className="cursor-pointer hover:shadow-lg transition rounded-lg"
+          onClick={() => navigate("/profit")} // ✅ Navigate to profit page
+        >
+          <Card className="border border-transparent hover:border-green-500 transition">
+            <CardHeader>
+              <CardTitle>Profit</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-bold text-green-600">
+                ₹{totalProfit.toFixed(2)}
+              </p>
+              <p className="text-muted-foreground">Total profit</p>
+            </CardContent>
+          </Card>
+        </div>
 
-        {/* ⚠️ Low Stock Card with Dialog */}
+        {/* Low Stock Alert */}
         <Dialog>
           <DialogTrigger asChild>
             <Card className="cursor-pointer hover:shadow-md transition">
@@ -127,7 +147,7 @@ const Dashboard = () => {
               <p className="text-center py-6 text-gray-600">Loading...</p>
             ) : lowStockParts.length === 0 ? (
               <p className="text-center py-6 text-gray-500">
-                All Items are sufficiently stocked.
+                All items are sufficiently stocked.
               </p>
             ) : (
               <table className="w-full text-left border-t border-gray-200">
@@ -168,7 +188,7 @@ const Dashboard = () => {
         </Dialog>
       </div>
 
-      {/* ✅ Parts Table */}
+      {/* Parts Table */}
       {!loading && (
         <div>
           <h2 className="text-xl font-semibold mt-8 mb-4">All Stock Data</h2>
@@ -177,7 +197,9 @@ const Dashboard = () => {
       )}
 
       {loading && (
-        <p className="text-center text-muted-foreground mt-4">Loading data...</p>
+        <p className="text-center text-muted-foreground mt-4">
+          Loading data...
+        </p>
       )}
     </div>
   );

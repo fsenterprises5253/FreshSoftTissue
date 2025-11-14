@@ -44,6 +44,7 @@ const BillingList = () => {
   useEffect(() => {
     fetchSavedBills();
   }, []);
+  
 
   return (
     <div className="p-6 space-y-6">
