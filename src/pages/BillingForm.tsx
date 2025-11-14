@@ -78,7 +78,7 @@ const BillingForm = () => {
     const price = customPrice && customPrice > 0 ? Number(customPrice) : selectedPart.price;
     const newItem = {
       id: selectedPart.id + "-" + Math.random(), // Ensure unique key
-      gsm_number: selectedPart.gsm_number,
+      gsm_number: String(selectedPart.gsm_number),
       quantity,
       price,
       total: price * quantity,
@@ -114,7 +114,7 @@ const BillingForm = () => {
     // Step 2: Save Bill Items (⚡ FIXED created_at added)
     const itemsData = billItems.map((item) => ({
       bill_id: billData.id,
-      gsm_number: item.gsm_number,
+      gsm_number: String(item.gsm_number),
       quantity: item.quantity,
       price: item.price,
       total: item.total,
