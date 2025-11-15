@@ -11,6 +11,8 @@ interface SavedBill {
   bill_number: string;
   customer_name: string;
   total_amount: number;
+  payment_mode: string | null;   // ✅ NEW
+  status: string | null;         // ✅ NEW
   created_at: string;
 }
 
@@ -21,11 +23,11 @@ const BillingList = () => {
   const fetchSavedBills = async () => {
     const { data, error } = await supabase
       .from("bills")
-      .select("*")
+      .select("*")   // Must include payment_mode, status
       .order("created_at", { ascending: false });
 
     if (error) toast.error("Failed to load saved bills");
-    else setSavedBills(data || []);
+    else setSavedBills((data as SavedBill[]) || []);
   };
 
   const deleteBill = async (billId: string) => {
@@ -34,6 +36,7 @@ const BillingList = () => {
     try {
       await supabase.from("bill_items").delete().eq("bill_id", billId);
       await supabase.from("bills").delete().eq("id", billId);
+
       toast.success("🗑️ Bill deleted successfully!");
       fetchSavedBills();
     } catch (err) {
@@ -44,7 +47,6 @@ const BillingList = () => {
   useEffect(() => {
     fetchSavedBills();
   }, []);
-  
 
   return (
     <div className="p-6 space-y-6">
@@ -64,6 +66,7 @@ const BillingList = () => {
       {savedBills.length > 0 && (
         <div className="border rounded-lg p-4 bg-white shadow-sm mt-6">
           <h2 className="text-xl font-semibold mb-3">Saved Bills</h2>
+
           <Table>
             <TableHeader>
               <TableRow className="bg-gray-100">
@@ -71,42 +74,76 @@ const BillingList = () => {
                 <TableHead>Customer</TableHead>
                 <TableHead>Date</TableHead>
                 <TableHead>Total</TableHead>
+                <TableHead>Payment Mode</TableHead> {/* ✅ NEW */}
+                <TableHead>Status</TableHead>        {/* ✅ NEW */}
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
+
             <TableBody>
-  {savedBills.map((bill) => (
-    <TableRow key={bill.id}>
-      <TableCell className="text-blue-600">
-        {bill.bill_number}
-      </TableCell>
-      <TableCell>{bill.customer_name}</TableCell>
-      <TableCell>{new Date(bill.created_at).toLocaleString()}</TableCell>
-      <TableCell>₹{bill.total_amount.toFixed(2)}</TableCell>
-      <TableCell className="flex gap-2">
-        {/* ✅ View Bill Button */}
-        <Button
-          size="sm"
-          onClick={() => navigate(`/billing/${bill.id}`)}
-          className="bg-blue-500 hover:bg-blue-600 text-white"
-        >
-          👁️ View
-        </Button>
+              {savedBills.map((bill) => (
+                <TableRow key={bill.id}>
+                  <TableCell className="text-blue-600">
+                    {bill.bill_number}
+                  </TableCell>
 
-        {/* 🗑️ Delete Bill */}
-        <Button
-          variant="destructive"
-          size="sm"
-          onClick={() => deleteBill(bill.id)}
-          className="flex items-center gap-1"
-        >
-          <Trash2 className="w-4 h-4" /> Delete
-        </Button>
-      </TableCell>
-    </TableRow>
-  ))}
-</TableBody>
+                  <TableCell>{bill.customer_name}</TableCell>
 
+                  <TableCell>{new Date(bill.created_at).toLocaleString()}</TableCell>
+
+                  <TableCell>₹{bill.total_amount.toFixed(2)}</TableCell>
+
+                  {/* ✅ Payment Mode */}
+                  <TableCell className="font-medium">
+                    {bill.payment_mode || "—"}
+                  </TableCell>
+
+                  {/* ✅ Status */}
+                  <TableCell>
+                    <span
+                      className={`px-2 py-1 rounded text-white text-xs
+                        ${
+                          bill.status === "Paid"
+                            ? "bg-green-600"
+                            : bill.status === "Unpaid"
+                            ? "bg-red-600"
+                            : "bg-yellow-600"
+                        }`}
+                    >
+                      {bill.status || "—"}
+                    </span>
+                  </TableCell>
+
+                  {/* Actions */}
+                  <TableCell className="flex gap-2">
+                    <Button
+                      size="sm"
+                      onClick={() => navigate(`/billing/${bill.id}`)}
+                      className="bg-blue-500 hover:bg-blue-600 text-white"
+                    >
+                      👁️ View
+                    </Button>
+
+                    <Button
+                      size="sm"
+                      onClick={() => navigate(`/billing/edit/${bill.id}`)}
+                      className="bg-yellow-500 hover:bg-yellow-600 text-white"
+                    >
+                      ✏️ Edit
+                    </Button>
+
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => deleteBill(bill.id)}
+                      className="flex items-center gap-1"
+                    >
+                      <Trash2 className="w-4 h-4" /> Delete
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
           </Table>
         </div>
       )}

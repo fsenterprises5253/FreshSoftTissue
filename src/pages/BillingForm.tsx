@@ -31,6 +31,8 @@ const BillingForm = () => {
   const [quantity, setQuantity] = useState<number>(1);
   const [customPrice, setCustomPrice] = useState<number | "">("");
   const [billItems, setBillItems] = useState<BillItem[]>([]);
+  const [paymentMode, setPaymentMode] = useState("");
+  const [status, setStatus] = useState("Pending");
   const navigate = useNavigate();
   const printRef = useRef<HTMLDivElement>(null);
 
@@ -103,7 +105,11 @@ const BillingForm = () => {
           bill_number: billNumber,
           customer_name: customerName || "N/A",
           total_amount: subtotal,
-          created_at: new Date().toISOString(),
+          payment_mode: paymentMode,
+          status: status,
+          created_at: billDate
+            ? new Date(billDate).toISOString()
+            : new Date().toISOString(),
         },
       ])
       .select()
@@ -118,7 +124,9 @@ const BillingForm = () => {
       quantity: item.quantity,
       price: item.price,
       total: item.total,
-      created_at: new Date().toISOString(),   // ✅ REQUIRED for Profit Dashboard
+      created_at: billDate
+        ? new Date(billDate).toISOString()
+        : new Date().toISOString(),   // ✅ REQUIRED for Profit Dashboard
     }));
 
     const { error: itemsError } =
@@ -247,6 +255,49 @@ const BillingForm = () => {
         onChange={(e) => setCustomerName(e.target.value)}
         className="max-w-md"
       />
+
+      {/* Bill Date */}
+      <div className="mt-4">
+        <label className="text-sm font-medium">Bill Date</label>
+        <Input
+          type="date"
+          value={billDate}
+          onChange={(e) => setBillDate(e.target.value)}
+          className="border rounded-md p-2 w-50"
+        />
+      </div>
+
+      <div className="flex gap-4 mt-4">
+    <div>
+        <label className="text-sm font-medium">Payment Mode</label>
+        <select
+            value={paymentMode}
+            onChange={(e) => setPaymentMode(e.target.value)}
+            className="border rounded-md p-2 w-44"
+        >
+            <option value="">Select</option>
+            <option value="Cash">Cash</option>
+            <option value="UPI">UPI</option>
+            <option value="Bank">Bank Transfer</option>
+            <option value="Card">Card</option>
+        </select>
+    </div>
+
+    <div>
+        <label className="text-sm font-medium">Status</label>
+        <select
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+            className="border rounded-md p-2 w-44"
+        >
+            <option value="Paid">Paid</option>
+            <option value="Unpaid">Unpaid</option>
+        </select>
+    </div>
+</div>
+
+{/* 👇 This is your Part Selection block */}
+<div className="flex items-center gap-3"></div>
 
       {/* Part Selection */}
       <div className="flex items-center gap-3">

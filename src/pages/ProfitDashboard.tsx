@@ -219,6 +219,11 @@ const ProfitDashboard: React.FC = () => {
   const totalExpense = monthlyData.reduce((s, m) => s + m.expense, 0);
   const netTotal = totalProfit - totalExpense;
 
+  const totalSales = bills.reduce(
+  (sum, bill) => sum + (bill.total_amount || 0),
+  0
+);
+
   const bestMonth = monthlyData.reduce((best, m) => (m.net > (best?.net ?? -Infinity) ? m : best), null as MonthlyAgg | null);
   const worstMonth = monthlyData.reduce((worst, m) => (m.net < (worst?.net ?? Infinity) ? m : worst), null as MonthlyAgg | null);
 
@@ -346,13 +351,13 @@ const ProfitDashboard: React.FC = () => {
 
         <Card>
             <CardHeader>
-                <CardTitle>Profit Per Piece</CardTitle>
+                <CardTitle>Total Sales</CardTitle>
             </CardHeader>
             <CardContent>
                 <p className="text-2xl font-bold text-blue-600">
-                ₹{uniqueProfitPerPiece.toFixed(2)}
+                ₹{totalSales.toFixed(2)}
                 </p>
-                <p className="text-muted-foreground">Average profit per item sold</p>
+                <p className="text-muted-foreground">Total from all saved bills</p>
             </CardContent>
         </Card>
       </div>

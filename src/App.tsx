@@ -8,6 +8,7 @@ import Index from "@/pages/Index";
 import BillingList from "@/pages/BillingList";
 import BillingForm from "@/pages/BillingForm";
 import BillingView from "@/pages/BillingView";
+import BillingEdit from "@/pages/BillingEdit";   // ✅ NEW
 import ExpenseReport from "@/pages/ExpenseReport";
 import ProfitDashboard from "@/pages/ProfitDashboard";
 import NotFound from "@/pages/NotFound";
@@ -26,14 +27,16 @@ export default function App() {
         <Toaster />
         <Sonner position="top-right" richColors closeButton />
 
-        {/* ✅ BrowserRouter must wrap EVERYTHING */}
+        {/* Browser Router Wrapper */}
         <BrowserRouter>
           <Routes>
 
-            {/* ------ PUBLIC ROUTES ------- */}
+            {/* ---------- PUBLIC ROUTES ---------- */}
             <Route path="/login" element={<Login />} />
 
-            {/* ------ PROTECTED ROUTES ------- */}
+            {/* ---------- PROTECTED ROUTES ---------- */}
+
+            {/* Dashboard Home */}
             <Route
               path="/"
               element={
@@ -45,6 +48,7 @@ export default function App() {
               }
             />
 
+            {/* Billing List */}
             <Route
               path="/billing"
               element={
@@ -56,6 +60,7 @@ export default function App() {
               }
             />
 
+            {/* Add New Bill */}
             <Route
               path="/billing/new"
               element={
@@ -67,6 +72,7 @@ export default function App() {
               }
             />
 
+            {/* View Bill */}
             <Route
               path="/billing/:id"
               element={
@@ -78,6 +84,19 @@ export default function App() {
               }
             />
 
+            {/* ✅ EDIT BILL */}
+            <Route
+              path="/billing/edit/:id"
+              element={
+                <ProtectedRoute>
+                  <SidebarLayout>
+                    <BillingEdit />
+                  </SidebarLayout>
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Expense Report */}
             <Route
               path="/expense-report"
               element={
@@ -89,6 +108,7 @@ export default function App() {
               }
             />
 
+            {/* Profit Dashboard */}
             <Route
               path="/profit"
               element={
@@ -100,6 +120,7 @@ export default function App() {
               }
             />
 
+            {/* Invoice Form */}
             <Route
               path="/invoice"
               element={
@@ -111,6 +132,7 @@ export default function App() {
               }
             />
 
+            {/* Not Found */}
             <Route path="*" element={<NotFound />} />
 
           </Routes>
@@ -119,4 +141,3 @@ export default function App() {
     </QueryClientProvider>
   );
 }
-
