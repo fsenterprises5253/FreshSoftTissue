@@ -6,15 +6,25 @@ import { useState } from 'react';
 
 import Sidebar from '@/components/Sidebar';
 
-import { Menu } from 'lucide-react';
+import { Menu, LogOut } from 'lucide-react';
 
 import Image from 'next/image';
+
+import { useRouter } from 'next/navigation';
 
 
 
 export default function SidebarLayout({ children }: { children: React.ReactNode }) {
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  const router = useRouter();
+
+  const handleLogout = () => {
+    localStorage.removeItem('isAuthenticated');
+    localStorage.removeItem('userId');
+    router.push('/login');
+  };
 
 
 
@@ -98,6 +108,17 @@ export default function SidebarLayout({ children }: { children: React.ReactNode 
 
           <Sidebar collapsed={!sidebarOpen} />
 
+        </div>
+
+        {/* Logout Button */}
+        <div className="p-4 border-t">
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-3 w-full p-3 rounded-lg text-red-600 hover:bg-red-100"
+          >
+            <LogOut size={18} />
+            {sidebarOpen && 'Logout'}
+          </button>
         </div>
 
 

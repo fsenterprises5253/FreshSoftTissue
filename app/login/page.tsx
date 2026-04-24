@@ -30,7 +30,7 @@ export default function LoginPage() {
         localStorage.setItem('isAuthenticated', 'true');
         localStorage.setItem('userId', userId);
         toast.success('Login successful');
-        router.push('/billing');
+        router.push('/dashboard');
       } else {
         toast.error('Invalid User ID or Password');
       }
