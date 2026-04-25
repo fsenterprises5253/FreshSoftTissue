@@ -76,7 +76,8 @@ export default function PartsTable({ parts, onUpdate }: PartsTableProps) {
       </div>
 
       <div className="rounded-lg border bg-card shadow-sm overflow-hidden">
-        <Table>
+        <div className="overflow-x-auto">
+          <Table>
           <TableHeader>
             <TableRow className="bg-muted/50">
               <TableHead>GSM</TableHead>
@@ -152,6 +153,7 @@ export default function PartsTable({ parts, onUpdate }: PartsTableProps) {
             )}
           </TableBody>
         </Table>
+        </div>
       </div>
 
       {/* EDIT MODAL */}

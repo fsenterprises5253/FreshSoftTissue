@@ -1,4 +1,4 @@
-// File: D:\Fsenterprise - Main - Nextjs\app\(dashboard)\expenses\page.tsx
+// File: D:\Fsenterprise - Main - Nextjs - Mobile view\app\(dashboard)\expenses\page.tsx
 import * as entry from '../../../../../app/(dashboard)/expenses/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

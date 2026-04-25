@@ -1,4 +1,4 @@
-// File: D:\Fsenterprise - Main - Nextjs\app\api\customers\route.ts
+// File: D:\Fsenterprise - Main - Nextjs - Mobile view\app\api\customers\route.ts
 import * as entry from '../../../../../app/api/customers/route.js'
 import type { NextRequest } from 'next/server.js'
 

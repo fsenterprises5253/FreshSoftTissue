@@ -64,18 +64,18 @@
       <div className="space-y-8">
 
         {/* HEADER BANNER (MATCH YOUR DESIGN) */}
-        <div className="bg-white rounded-xl shadow-sm p-10 text-center">
-          <img src="/ezzylogo.png" className="mx-auto w-72 mb-4" />
-          <h1 className="text-3xl font-bold">
+        <div className="bg-white rounded-xl shadow-sm p-6 sm:p-8 md:p-10 text-center">
+          <img src="/ezzylogo.png" className="mx-auto w-48 sm:w-56 md:w-72 mb-4" />
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">
             Welcome to Fresh Soft Tissue Enterprises
           </h1>
-          <p className="text-gray-500 mt-2">
+          <p className="text-gray-500 mt-2 text-sm sm:text-base">
             Freshness you can feel, softness you can trust.
           </p>
         </div>
 
         {/* HEADER */}
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <h2 className="text-xl font-semibold">Stock Inventory</h2>
 
           {/* Add Stock Button */}
@@ -144,12 +144,12 @@
 
         {/* LOW STOCK ALERT */}
         {lowStockCount > 0 && (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-5">
-            <h2 className="text-lg font-semibold mb-3">
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 sm:p-5">
+            <h2 className="text-base sm:text-lg font-semibold mb-3">
               Items That Need Reordering
             </h2>
 
-            <ul className="list-disc pl-5 text-gray-700">
+            <ul className="list-disc pl-5 text-gray-700 text-sm sm:text-base">
               {lowStockParts.map((p) => (
                 <li key={p.id}>
                   {p.category} — GSM {p.gsm_number}

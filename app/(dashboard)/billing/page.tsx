@@ -630,18 +630,18 @@ const BillingList = () => {
   };
 
   return (
-    <div className="p-10 w-full space-y-10">
+    <div className="p-4 sm:p-6 md:p-10 w-full space-y-6 sm:space-y-10">
       {/* HEADER */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-3xl font-bold flex items-center gap-2">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
           🧾 Billing Section
         </h1>
 
         {/* TOP RIGHT: ADD BILL BUTTON */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 w-full sm:w-auto">
           <Button
             onClick={() => router.push("/billing/new")}
-            className="bg-blue-600 hover:bg-blue-700 text-white text-lg px-6 py-3 rounded-lg shadow"
+            className="bg-blue-600 hover:bg-blue-700 text-white text-base sm:text-lg px-4 sm:px-6 py-2 sm:py-3 rounded-lg shadow w-full sm:w-auto"
           >
             + Add New Bill
           </Button>
@@ -649,23 +649,23 @@ const BillingList = () => {
       </div>
 
       {/* SEARCH + FILTER BAR */}
-      <div className="border rounded-2xl p-5 bg-white shadow-sm">
-        <div className="flex flex-wrap items-end gap-6">
+      <div className="border rounded-2xl p-4 sm:p-5 bg-white shadow-sm">
+        <div className="flex flex-wrap items-end gap-4 sm:gap-6">
 
           {/* SEARCH */}
-          <div className="flex flex-col flex-1 min-w-[240px]">
+          <div className="flex flex-col flex-1 min-w-[200px] sm:min-w-[240px]">
             <label className="text-xs font-medium text-gray-600 mb-1">Search</label>
             <input
               type="text"
               placeholder="Search "
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="border px-4 py-2 rounded-xl text-sm shadow-sm focus:ring-2 focus:ring-blue-300 outline-none"
+              className="border px-3 sm:px-4 py-2 rounded-xl text-sm shadow-sm focus:ring-2 focus:ring-blue-300 outline-none"
             />
           </div>
 
           {/* DATE RANGE PICKER */}
-          <div className="flex flex-col min-w-[220px]">
+          <div className="flex flex-col min-w-[180px] sm:min-w-[220px]">
             <label className="text-xs font-medium text-gray-600 mb-1">Date mm/dd/yyyy</label>
             <ModernDatePicker
               label=""
@@ -681,7 +681,7 @@ const BillingList = () => {
           </div>
 
           {/* Payment Mode */}
-          <div className="flex flex-col min-w-[160px]">
+          <div className="flex flex-col min-w-[140px] sm:min-w-[160px]">
             <label className="text-xs font-medium text-gray-600 mb-1">Payment Mode</label>
             <select
               value={filterPaymentMode}
@@ -700,26 +700,26 @@ const BillingList = () => {
         </div>
 
         {/* EXPORT & CLEAR */}
-        <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3 mt-4">
           <div className="flex flex-wrap gap-2">
             <Button
               size="sm"
               onClick={exportCSV}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
+              className="bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm"
             >
               Export CSV
             </Button>
             <Button
               size="sm"
               onClick={exportXLSX}
-              className="bg-green-600 hover:bg-green-700 text-white"
+              className="bg-green-600 hover:bg-green-700 text-white text-xs sm:text-sm"
             >
               Export XLSX
             </Button>
             <Button
               size="sm"
               onClick={exportPDF}
-              className="bg-red-600 hover:bg-red-700 text-white"
+              className="bg-red-600 hover:bg-red-700 text-white text-xs sm:text-sm"
             >
               Export PDF
             </Button>
@@ -729,17 +729,18 @@ const BillingList = () => {
             variant="outline"
             size="sm"
             onClick={clearFilters}
-            className="border-gray-300"
+            className="border-gray-300 text-xs sm:text-sm"
           >
             Clear Filters
           </Button>
         </div>
 
       {/* TABLE */}
-      <div className="border rounded-lg p-6 bg-white shadow-md">
-        <h2 className="text-xl font-semibold mb-4">Saved Bills</h2>
+      <div className="border rounded-lg p-4 sm:p-6 bg-white shadow-md">
+        <h2 className="text-lg sm:text-xl font-semibold mb-4">Saved Bills</h2>
 
-        <Table>
+        <div className="overflow-x-auto">
+          <Table>
           <TableHeader>
             <TableRow className="bg-gray-100">
               <TableHead
@@ -859,6 +860,7 @@ const BillingList = () => {
             )}
           </TableBody>
         </Table>
+        </div>
 
         {/* Small hint for infinite scroll */}
         {visibleBills.length < filteredAndSortedBills.length && (

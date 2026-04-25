@@ -1,4 +1,4 @@
-// File: D:\Fsenterprise - Main - Nextjs\app\api\profit-ledger\bulk-insert\route.ts
+// File: D:\Fsenterprise - Main - Nextjs - Mobile view\app\api\profit-ledger\bulk-insert\route.ts
 import * as entry from '../../../../../../app/api/profit-ledger/bulk-insert/route.js'
 import type { NextRequest } from 'next/server.js'
 

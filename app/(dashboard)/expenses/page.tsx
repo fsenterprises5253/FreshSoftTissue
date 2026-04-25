@@ -390,17 +390,17 @@ export default function ExpenseReport() {
   };
 
   return (
-    <div className="p-6 max-w-6xl mx-auto space-y-6">
+    <div className="p-4 sm:p-6 max-w-6xl mx-auto space-y-4 sm:space-y-6">
 
       {/* PAGE TITLE */}
-      <div className="flex justify-between items-center">
-      <h1 className="text-3xl font-bold flex items-center gap-2">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
         📊 Expense Report
       </h1>
       {/* ADD EXPENSE */}
       <button
         onClick={() => setShowModal(true)}
-        className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl font-medium"
+        className="bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-5 py-2 sm:py-3 rounded-xl font-medium text-sm sm:text-base w-full sm:w-auto"
       >
         + Add New Expense
       </button>
@@ -413,7 +413,7 @@ export default function ExpenseReport() {
         <input
           type="text"
           placeholder="Search"
-          className="border rounded-lg px-4 py-2 flex-1"
+          className="border rounded-lg px-3 sm:px-4 py-2 flex-1 min-w-[200px] text-sm"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
@@ -422,19 +422,19 @@ export default function ExpenseReport() {
         <ModernRangePicker
           label="Date Range"
           value={{ from: fromDate ? new Date(fromDate) : undefined, to: toDate ? new Date(toDate) : undefined }}
-          onChange={(range) => { 
+          onChange={(range) => {
             setFromDate(range.from ? range.from.toISOString().split("T")[0] : "");
             setToDate(range.to ? range.to.toISOString().split("T")[0] : "");
           }}
-        />      
+        />
 
         {/* EXPORT & RESET */}
-        <div className="w-full flex items-center justify-between mt-3">
-          <div className="flex gap-2">
+        <div className="w-full flex flex-col sm:flex-row items-center justify-between gap-3 mt-3">
+          <div className="flex flex-wrap gap-2 w-full sm:w-auto">
 
             <Button
               size="sm"
-              className="bg-blue-600 hover:bg-blue-700 text-white"
+              className="bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm"
               onClick={exportCSV}
             >
               Export CSV
@@ -442,7 +442,7 @@ export default function ExpenseReport() {
 
             <Button
               size="sm"
-              className="bg-green-600 hover:bg-green-700 text-white"
+              className="bg-green-600 hover:bg-green-700 text-white text-xs sm:text-sm"
               onClick={exportXLSX}
             >
               Export XLSX
@@ -450,7 +450,7 @@ export default function ExpenseReport() {
 
             <Button
               size="sm"
-              className="bg-red-600 hover:bg-red-700 text-white"
+              className="bg-red-600 hover:bg-red-700 text-white text-xs sm:text-sm"
               onClick={exportPDF}
             >
               Export PDF
@@ -461,7 +461,7 @@ export default function ExpenseReport() {
           <Button
             size="sm"
             variant="outline"
-            className="bg-gray-200 hover:bg-gray-300 text-black"
+            className="bg-gray-200 hover:bg-gray-300 text-black text-xs sm:text-sm w-full sm:w-auto"
             onClick={clearFilters}
           >
             Clear Filters
@@ -471,7 +471,8 @@ export default function ExpenseReport() {
 
       {/* TABLE */}
       <div className="bg-white rounded-xl shadow border overflow-hidden">
-        <table className="w-full">
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[600px]">
           <thead className="bg-gray-100 text-gray-600">
             <tr>
               <th
@@ -615,6 +616,7 @@ export default function ExpenseReport() {
             )}
           </tbody>
         </table>
+        </div>
 
         {/* scroll hint */}
         {visibleExpenses.length < filteredAndSorted.length && (
@@ -626,10 +628,10 @@ export default function ExpenseReport() {
 
       {/* ADD EXPENSE MODAL */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
-          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-lg animate-fade-in">
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl p-4 sm:p-6 w-full max-w-lg animate-fade-in">
 
-            <h2 className="text-xl font-semibold mb-4">Add New Expense</h2>
+            <h2 className="text-lg sm:text-xl font-semibold mb-4">Add New Expense</h2>
 
             {/* Item */}
             <div className="mb-3">
@@ -674,18 +676,18 @@ export default function ExpenseReport() {
             </div>
 
             {/* Buttons */}
-            <div className="flex justify-end gap-3 mt-5">
+            <div className="flex flex-col sm:flex-row justify-end gap-3 mt-5">
 
               <button
                 onClick={() => setShowModal(false)}
-                className="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300"
+                className="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 w-full sm:w-auto"
               >
                 Cancel
               </button>
 
               <button
                 onClick={handleSaveExpense}
-                className="px-5 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700"
+                className="px-5 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 w-full sm:w-auto"
               >
                 Save Expense
               </button>

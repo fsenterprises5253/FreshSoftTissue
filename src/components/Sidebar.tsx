@@ -11,9 +11,10 @@ import {
 
 interface SidebarProps {
   collapsed?: boolean;
+  onNavigate?: () => void;
 }
 
-export default function Sidebar({ collapsed = false }: SidebarProps) {
+export default function Sidebar({ collapsed = false, onNavigate }: SidebarProps) {
   const router = useRouter();
   const pathname = usePathname() || '';
 
@@ -38,7 +39,10 @@ export default function Sidebar({ collapsed = false }: SidebarProps) {
 
         {/* Dashboard */}
         <button
-          onClick={() => router.push('/dashboard')}
+          onClick={() => {
+            onNavigate?.();
+            router.push('/dashboard');
+          }}
           className={`flex items-center gap-3 w-full p-3 rounded-lg ${
             isActive('/dashboard')
               ? 'bg-blue-600 text-white font-semibold'
@@ -51,7 +55,10 @@ export default function Sidebar({ collapsed = false }: SidebarProps) {
 
         {/* Billing */}
         <button
-          onClick={() => router.push('/billing')}
+          onClick={() => {
+            onNavigate?.();
+            router.push('/billing');
+          }}
           className={`flex items-center gap-3 w-full p-3 rounded-lg ${
             isActive('/billing')
               ? 'bg-blue-600 text-white font-semibold'
@@ -64,7 +71,10 @@ export default function Sidebar({ collapsed = false }: SidebarProps) {
 
         {/* Expense */}
         <button
-          onClick={() => router.push('/expenses')}
+          onClick={() => {
+            onNavigate?.();
+            router.push('/expenses');
+          }}
           className={`flex items-center gap-3 w-full p-3 rounded-lg ${
             isActive('/expenses')
               ? 'bg-blue-600 text-white font-semibold'
@@ -77,7 +87,10 @@ export default function Sidebar({ collapsed = false }: SidebarProps) {
 
         {/* Profit */}
         <button
-          onClick={() => router.push('/reports')}
+          onClick={() => {
+            onNavigate?.();
+            router.push('/reports');
+          }}
           className={`flex items-center gap-3 w-full p-3 rounded-lg ${
             isActive('/reports')
               ? 'bg-blue-600 text-white font-semibold'

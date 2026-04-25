@@ -1,24 +1,27 @@
 'use client';
 
-
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import Sidebar from '@/components/Sidebar';
 
-import { Menu, LogOut } from 'lucide-react';
+import { Menu, LogOut, X } from 'lucide-react';
 
 import Image from 'next/image';
 
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
+import { useIsMobile } from '@/hooks/use-mobile';
 
 
 export default function SidebarLayout({ children }: { children: React.ReactNode }) {
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const isMobile = useIsMobile();
 
   const router = useRouter();
+  const pathname = usePathname();
+
 
   const handleLogout = () => {
     sessionStorage.removeItem('isAuthenticated');
@@ -26,6 +29,22 @@ export default function SidebarLayout({ children }: { children: React.ReactNode 
     router.push('/login');
   };
 
+  // Close mobile menu when switching to desktop
+  useEffect(() => {
+    if (!isMobile) {
+      setMobileMenuOpen(false);
+      setSidebarOpen(true);
+    } else {
+      setSidebarOpen(false);
+    }
+  }, [isMobile]);
+
+  // Close mobile menu when route changes
+  useEffect(() => {
+    if (isMobile) {
+      setMobileMenuOpen(false);
+    }
+  }, [pathname, isMobile]);
 
 
   return (
@@ -34,13 +53,27 @@ export default function SidebarLayout({ children }: { children: React.ReactNode 
 
 
 
+      {/* Mobile Overlay */}
+      {isMobile && mobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
 
       <aside
 
-        className={`bg-white border-r shadow-sm flex flex-col transition-all duration-300 ease-in-out
-
-        ${sidebarOpen ? 'w-64' : 'w-20'}`}
+        className={`bg-white border-r shadow-sm flex flex-col transition-all duration-300 ease-in-out z-50
+        ${isMobile
+          ? mobileMenuOpen
+            ? 'fixed inset-y-0 left-0 w-64 transform translate-x-0'
+            : 'fixed inset-y-0 left-0 w-64 transform -translate-x-0'
+          : sidebarOpen
+          ? 'w-64'
+          : 'w-20'}
+        ${isMobile && !mobileMenuOpen ? '-translate-x-full' : ''}`}
 
       >
 
@@ -70,7 +103,7 @@ export default function SidebarLayout({ children }: { children: React.ReactNode 
 
 
 
-            {sidebarOpen && (
+            {(sidebarOpen || isMobile) && (
 
               <h1 className="text-lg font-semibold text-gray-900 whitespace-nowrap">
 
@@ -85,18 +118,26 @@ export default function SidebarLayout({ children }: { children: React.ReactNode 
 
 
           {/* Toggle Button */}
+          {isMobile ? (
+            <button
+              onClick={() => setMobileMenuOpen(false)}
+              className="p-2 rounded-md hover:bg-gray-100 transition ml-2"
+            >
+              <X size={20} className="text-gray-700" />
+            </button>
+          ) : (
+            <button
 
-          <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
 
-            onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="p-2 rounded-md hover:bg-gray-100 transition ml-2"
 
-            className="p-2 rounded-md hover:bg-gray-100 transition ml-2"
+            >
 
-          >
+              <Menu size={20} className="text-gray-700" />
 
-            <Menu size={20} className="text-gray-700" />
-
-          </button>
+            </button>
+          )}
 
         </div>
 
@@ -106,7 +147,12 @@ export default function SidebarLayout({ children }: { children: React.ReactNode 
 
         <div className="flex-1 overflow-y-auto">
 
-          <Sidebar collapsed={!sidebarOpen} />
+          <Sidebar
+            collapsed={!sidebarOpen && !isMobile}
+            onNavigate={() => {
+              if (isMobile) setMobileMenuOpen(false);
+            }}
+          />
 
         </div>
 
@@ -117,7 +163,7 @@ export default function SidebarLayout({ children }: { children: React.ReactNode 
             className="flex items-center gap-3 w-full p-3 rounded-lg text-red-600 hover:bg-red-100"
           >
             <LogOut size={18} />
-            {sidebarOpen && 'Logout'}
+            {(sidebarOpen || isMobile) && 'Logout'}
           </button>
         </div>
 
@@ -131,9 +177,21 @@ export default function SidebarLayout({ children }: { children: React.ReactNode 
 
       <div className="flex-1 flex flex-col overflow-hidden">
 
+        {/* Mobile Header */}
+        {isMobile && (
+          <div className="flex items-center justify-between p-4 border-b bg-white lg:hidden">
+            <button
+              onClick={() => setMobileMenuOpen(true)}
+              className="p-2 rounded-md hover:bg-gray-100 transition"
+            >
+              <Menu size={20} className="text-gray-700" />
+            </button>
+            <h1 className="text-lg font-semibold text-gray-900">FS Enterprise</h1>
+            <div className="w-8" />
+          </div>
+        )}
 
-
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 overflow-y-auto p-4 lg:p-6">
 
           {children}
 

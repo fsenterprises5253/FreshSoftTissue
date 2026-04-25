@@ -121,36 +121,36 @@ const ProfitDashboard: React.FC = () => {
 
   // ================= SYNC BILLS TO PROFIT LEDGER =================
   const syncBillsToLedger = async (bills: BillRow[]) => {
-  try {
-    const existing = await fetch("/api/profit-ledger");
-    const existingRows = await existing.json();
+    try {
+      const existing = await fetch("/api/profit-ledger");
+      const existingRows = await existing.json();
 
-    // Build a unique key for each stored ledger row
-    const existingKeys = new Set(
-      existingRows.map((r: any) =>
-        `${r.bill_id}-${r.bill_date}-${r.gsm_number}-${r.price}-${r.quantity}`
-      )
-    );
+      // Build a unique key for each stored ledger row
+      const existingKeys = new Set(
+        existingRows.map((r: any) =>
+          `${r.bill_id}-${r.bill_date}-${r.gsm_number}-${r.price}-${r.quantity}`
+        )
+      );
 
-    // Build a unique key for each bill row coming from Billing table
-    const newEntries = bills.filter((b) => {
-      const key = `${b.bill_id}-${b.bill_date}-${b.gsm_number}-${b.price}-${b.quantity}`;
-      return !existingKeys.has(key);
-    });
+      // Build a unique key for each bill row coming from Billing table
+      const newEntries = bills.filter((b) => {
+        const key = `${b.bill_id}-${b.bill_date}-${b.gsm_number}-${b.price}-${b.quantity}`;
+        return !existingKeys.has(key);
+      });
 
-    if (newEntries.length === 0) return;
+      if (newEntries.length === 0) return;
 
-    await fetch("/api/profit-ledger/bulk-insert", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newEntries),
-    });
+      await fetch("/api/profit-ledger/bulk-insert", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newEntries),
+      });
 
-    console.log("Synced bills into Profit Ledger:", newEntries);
-  } catch (err) {
-    console.error("Ledger sync failed:", err);
-  }
-};
+      console.log("Synced bills into Profit Ledger:", newEntries);
+    } catch (err) {
+      console.error("Ledger sync failed:", err);
+    }
+  };
 
 
   // ================= FETCH DATA =================
@@ -455,11 +455,11 @@ const ProfitDashboard: React.FC = () => {
   if (loading) return <p className="p-6">Loading...</p>;
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-      <h1 className="text-2xl font-bold">📈 Profit Dashboard</h1>
-        <Button 
-            className="bg-cyan-600 hover:bg-cyan-700 text-white"
+    <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <h1 className="text-xl sm:text-2xl font-bold">📈 Profit Dashboard</h1>
+        <Button
+            className="bg-cyan-600 hover:bg-cyan-700 text-white text-sm sm:text-base px-4 sm:px-6 py-2 w-full sm:w-auto"
             onClick={() => {
               setShowGraphsModal(true);
               if (!localStorage.getItem("chartView")) {
@@ -471,31 +471,31 @@ const ProfitDashboard: React.FC = () => {
           </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card><CardHeader><CardTitle>Total Profit</CardTitle></CardHeader><CardContent><p className="text-green-600 text-xl font-bold">₹{totalProfit.toFixed(2)}</p></CardContent></Card>
-        <Card><CardHeader><CardTitle>Total Expense</CardTitle></CardHeader><CardContent><p className="text-red-600 text-xl font-bold">₹{totalExpense.toFixed(2)}</p></CardContent></Card>
-        <Card><CardHeader><CardTitle>Net Profit</CardTitle></CardHeader><CardContent><p className="text-gray-500 text-xl font-bold">₹{netTotal.toFixed(2)}</p></CardContent></Card>
-        <Card><CardHeader><CardTitle>Total Sales</CardTitle></CardHeader><CardContent><p className="text-blue-600 text-xl font-bold">₹{totalSales.toFixed(2)}</p></CardContent></Card>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card><CardHeader><CardTitle className="text-sm sm:text-base">Total Profit</CardTitle></CardHeader><CardContent><p className="text-green-600 text-lg sm:text-xl font-bold">₹{totalProfit.toFixed(2)}</p></CardContent></Card>
+        <Card><CardHeader><CardTitle className="text-sm sm:text-base">Total Expense</CardTitle></CardHeader><CardContent><p className="text-red-600 text-lg sm:text-xl font-bold">₹{totalExpense.toFixed(2)}</p></CardContent></Card>
+        <Card><CardHeader><CardTitle className="text-sm sm:text-base">Net Profit</CardTitle></CardHeader><CardContent><p className="text-gray-500 text-lg sm:text-xl font-bold">₹{netTotal.toFixed(2)}</p></CardContent></Card>
+        <Card><CardHeader><CardTitle className="text-sm sm:text-base">Total Sales</CardTitle></CardHeader><CardContent><p className="text-blue-600 text-lg sm:text-xl font-bold">₹{totalSales.toFixed(2)}</p></CardContent></Card>
       </div>
 
       {/* FILTERS */}
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div className="flex justify-end mb-4">
+      <div className="flex flex-wrap items-start sm:items-end justify-between gap-4">
+        <div className="w-full sm:w-auto">
           <Button
             onClick={() => setShowTableFilter(true)}
-            className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700"
+            className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 text-sm w-full sm:w-auto"
           >
             Filters
           </Button>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2 w-full sm:w-auto">
           {/* SHOW GRAPHS BUTTON */}
           <Button
             onClick={() => {
               setExportFormat("csv");
               setShowExportModal(true);
             }}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
+            className="bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm"
           >
             Export CSV
           </Button>
@@ -504,7 +504,7 @@ const ProfitDashboard: React.FC = () => {
               setExportFormat("xlsx");
               setShowExportModal(true);
             }}
-            className="bg-green-600 hover:bg-green-700 text-white"
+            className="bg-green-600 hover:bg-green-700 text-white text-xs sm:text-sm"
           >
             Export XLSX
           </Button>
@@ -513,7 +513,7 @@ const ProfitDashboard: React.FC = () => {
             setExportFormat("pdf");
             setShowExportModal(true);
           }}
-          className="bg-red-600 hover:bg-red-700 text-white"
+          className="bg-red-600 hover:bg-red-700 text-white text-xs sm:text-sm"
         >
           Export PDF
         </Button>
@@ -521,11 +521,11 @@ const ProfitDashboard: React.FC = () => {
       </div>
 
       {showGraphsModal && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[999] overflow-visible">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[999] overflow-visible p-4">
           <div
             ref={modalRef}
-             className={`bg-white rounded-xl shadow-xl p-6 relative overflow-visible animate-fade-in
-              ${chartView === "all" ? "w-[95%] max-w-[1600px]" : "w-[50%] max-w-[650px]"}`}
+             className={`bg-white rounded-xl shadow-xl p-4 sm:p-6 relative overflow-visible animate-fade-in max-h-[90vh] overflow-y-auto
+              ${chartView === "all" ? "w-full max-w-[1600px]" : "w-full max-w-[650px]"}`}
           >
 
             {/* CLOSE BUTTON */}
@@ -601,8 +601,8 @@ const ProfitDashboard: React.FC = () => {
             </div>
 
             {/* GRAPHS GRID */}
-            <div 
-              className={`grid gap-8 ${
+            <div
+              className={`grid gap-4 sm:gap-8 ${
                 chartView === "all"
                   ? "grid-cols-1 lg:grid-cols-3"
                   : "grid-cols-1"
@@ -691,10 +691,10 @@ const ProfitDashboard: React.FC = () => {
 
       {/* TABLE FILTER POPUP */}
       {showTableFilter && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[999]">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[999] p-4">
           <div
             ref={filterModalRef}
-            className="bg-white rounded-xl shadow-xl w-[90%] max-w-3xl p-6 relative animate-fade-in overflow-visible"
+            className="bg-white rounded-xl shadow-xl w-full max-w-3xl p-4 sm:p-6 relative animate-fade-in overflow-visible max-h-[90vh] overflow-y-auto"
           >
 
             {/* Close Button */}
@@ -705,12 +705,12 @@ const ProfitDashboard: React.FC = () => {
               ×
             </button>
 
-            <h2 className="text-xl font-bold mb-4">Filter Ledger</h2>
+            <h2 className="text-lg sm:text-xl font-bold mb-4">Filter Ledger</h2>
 
-            <div className="flex">
+            <div className="flex flex-col sm:flex-row">
 
               {/* LEFT CATEGORY MENU */}
-              <div className="w-1/3 pr-4 border-r">
+              <div className="w-full sm:w-1/3 pr-0 sm:pr-4 border-r-0 sm:border-r">
                 <div className="space-y-3">
                   <div
                     className={`px-3 py-2 rounded-lg cursor-pointer font-medium
@@ -749,7 +749,7 @@ const ProfitDashboard: React.FC = () => {
               </div>
 
               {/* RIGHT FILTER OPTIONS */}
-              <div className="w-2/3 pl-6 space-y-4">
+              <div className="w-full sm:w-2/3 pl-0 sm:pl-6 space-y-4 mt-4 sm:mt-0">
 
                 {/* Date */}
                 <div className="relative z-[99999]">
@@ -837,21 +837,21 @@ const ProfitDashboard: React.FC = () => {
 
       {/* Export pop up */}
       {showExportModal && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 shadow-xl w-[400px]">
-            <h2 className="text-xl font-semibold mb-4">Select Ledger to Export</h2>
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-4 sm:p-6 shadow-xl w-full max-w-[400px]">
+            <h2 className="text-lg sm:text-xl font-semibold mb-4">Select Ledger to Export</h2>
 
-            <div className="flex flex-row items-center gap-4 w-full justify-center">
+            <div className="flex flex-col sm:flex-row items-center gap-4 w-full justify-center">
               <button
                 onClick={() => handleExport("profit")}
-                className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl w-1/2 text-center whitespace-nowrap"
+                className="bg-green-600 hover:bg-green-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl w-full sm:w-1/2 text-center whitespace-nowrap"
               >
                 Profit Ledger
               </button>
 
               <button
                 onClick={() => handleExport("expense")}
-                className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl w-1/2 text-center whitespace-nowrap"
+                className="bg-red-600 hover:bg-red-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl w-full sm:w-1/2 text-center whitespace-nowrap"
               >
                 Expense Ledger
               </button>
@@ -870,12 +870,12 @@ const ProfitDashboard: React.FC = () => {
       {/* PROFIT LEDGER */}
       {(visibleLedger === "both" || visibleLedger === "profit") && (
       <Card>
-        <CardHeader><CardTitle>Profit Ledger</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-base sm:text-lg">Profit Ledger</CardTitle></CardHeader>
         <CardContent>
         {/* Scrollable Ledger Container */}
         <div className="fade-in" style={{ maxHeight: "350px", overflowY: "auto" }}>
-        <div style={{ maxHeight: "350px", overflowY: "auto" }}>
-          <table className="w-full border-collapse">
+        <div style={{ maxHeight: "350px", overflowY: "auto" }} className="overflow-x-auto">
+          <table className="w-full border-collapse min-w-[800px]">
             <thead>
               <tr className="bg-gray-50">
                 <th className="p-3">Date</th>
@@ -918,9 +918,10 @@ const ProfitDashboard: React.FC = () => {
       {/* EXPENSE LEDGER */}
       {(visibleLedger === "both" || visibleLedger === "expense") && (
       <Card>
-        <CardHeader><CardTitle>Expense Ledger</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-base sm:text-lg">Expense Ledger</CardTitle></CardHeader>
         <CardContent>
-          <table className="w-full border-collapse">
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse min-w-[600px]">
             <thead>
               <tr className="bg-gray-50">
                 <th className="p-3">Date</th>
@@ -940,7 +941,8 @@ const ProfitDashboard: React.FC = () => {
                 <tr><td colSpan={3} className="p-6 text-center text-gray-500">No expenses found.</td></tr>
               )}
             </tbody>
-          </table>
+            </table>
+          </div>
         </CardContent>
       </Card>
       )}
