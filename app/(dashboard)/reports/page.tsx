@@ -1,9 +1,19 @@
 'use client';
 
 import { useEffect, useMemo, useState, useRef } from "react";
+import dynamic from "next/dynamic";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import { DropdownMenuPortal } from "@radix-ui/react-dropdown-menu";
+import ModernRangePicker from "@/components/ModernDatePicker";
+
 import {
   ResponsiveContainer,
   BarChart,
@@ -15,19 +25,10 @@ import {
   Tooltip,
   Legend,
   CartesianGrid,
+  PieChart,
+  Pie,
+  Cell
 } from "recharts";
-import { PieChart, Pie, Cell } from "recharts";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
-import { DropdownMenuPortal } from "@radix-ui/react-dropdown-menu";
-import * as XLSX from "xlsx";                        // For XLSX export
-import jsPDF from "jspdf";                           // For PDF export
-import autoTable from "jspdf-autotable";             // Table support for PDF
-import ModernRangePicker from "@/components/ModernDatePicker";
 
 
 
@@ -309,7 +310,8 @@ const ProfitDashboard: React.FC = () => {
   // ===============================
   // EXPORT PROFIT XLSX
   // ===============================
-  const exportProfitXLSX = () => {
+  const exportProfitXLSX = async () => {
+    const XLSX = await import("xlsx");
     const data = filteredLedger.map((row: any) => ({
       Date: row.date,
       GSM: row.gsm,
@@ -330,7 +332,9 @@ const ProfitDashboard: React.FC = () => {
   // ===============================
   // EXPORT PROFIT PDF
   // ===============================
-  const exportProfitPDF = () => {
+  const exportProfitPDF = async () => {
+    const jsPDF = (await import("jspdf")).default;
+    const autoTable = (await import("jspdf-autotable")).default;
     const doc = new jsPDF();
 
     const tableData = filteredLedger.map((row) => [
@@ -379,7 +383,8 @@ const ProfitDashboard: React.FC = () => {
   // ===============================
   // EXPORT EXPENSE XLSX
   // ===============================
-  const exportExpenseXLSX = () => {
+  const exportExpenseXLSX = async () => {
+    const XLSX = await import("xlsx");
     const data = filteredExpense.map((row: any) => ({
       Date: row.created_at,
       Description: row.item || "-",
@@ -395,7 +400,9 @@ const ProfitDashboard: React.FC = () => {
   // ===============================
   // EXPORT EXPENSE PDF
   // ===============================
-  const exportExpensePDF = () => {
+  const exportExpensePDF = async () => {
+    const jsPDF = (await import("jspdf")).default;
+    const autoTable = (await import("jspdf-autotable")).default;
     const doc = new jsPDF();
 
     const tableData = filteredExpense.map((row) => [
