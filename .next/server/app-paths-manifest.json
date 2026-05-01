@@ -1,8 +1,0 @@
-{
-  "/api/billing/route": "app/api/billing/route.js",
-  "/api/billing/[id]/route": "app/api/billing/[id]/route.js",
-  "/api/stock/route": "app/api/stock/route.js",
-  "/api/billing/[id]/items/route": "app/api/billing/[id]/items/route.js",
-  "/(dashboard)/billing/page": "app/(dashboard)/billing/page.js",
-  "/(dashboard)/billing/edit/[id]/page": "app/(dashboard)/billing/edit/[id]/page.js"
-}
